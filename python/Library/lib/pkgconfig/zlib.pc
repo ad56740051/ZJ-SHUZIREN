@@ -1,0 +1,13 @@
+prefix=D:/Anaconda/envs/realtime_wav2lip/Library
+exec_prefix=D:/Anaconda/envs/realtime_wav2lip/Library
+libdir=D:/Anaconda/envs/realtime_wav2lip/Library/lib
+sharedlibdir=D:/Anaconda/envs/realtime_wav2lip/Library/lib
+includedir=D:/Anaconda/envs/realtime_wav2lip/Library/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
