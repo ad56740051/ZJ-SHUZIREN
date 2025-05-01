@@ -116,7 +116,10 @@ class BaseReal:
         self.asr.flush_talk()
 
     def is_speaking(self)->bool:
-        return self.speaking
+        """
+        返回数字人是否正在说话
+        """
+        return self.speaking if hasattr(self, 'speaking') else False
     
     def __loadcustom(self):
         for item in self.opt.customopt:

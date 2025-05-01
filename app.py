@@ -191,6 +191,9 @@ def build_nerfreal(sessionid):
 
     from lipreal import LipReal
     nerfreal = LipReal(opt,model,avatar)
+    
+    if opt.enable_static_video and opt.static_video:
+        nerfreal.load_static_video(opt.static_video)
 
     return nerfreal
 
@@ -329,6 +332,35 @@ async def is_speaking(request):
         ),
     )
 
+async def set_static_video(request):
+    params = await request.json()
+    
+    sessionid = params.get('sessionid',0)
+    if params.get('enable', False):
+        if params.get('video_path', ''):
+            nerfreals[sessionid].load_static_video(params['video_path'])
+            return web.Response(
+                content_type="application/json",
+                text=json.dumps(
+                    {"code": 0, "data": "静态视频已加载"}
+                ),
+            )
+        else:
+            return web.Response(
+                content_type="application/json",
+                text=json.dumps(
+                    {"code": -1, "data": "未提供视频路径"}
+                ),
+            )
+    else:
+        nerfreals[sessionid].static_video_enabled = False
+        return web.Response(
+            content_type="application/json",
+            text=json.dumps(
+                {"code": 0, "data": "静态视频已禁用"}
+            ),
+        )
+
 
 async def on_shutdown(app):
     # close peer connections
@@ -411,6 +443,9 @@ if __name__ == '__main__':
     # parser.add_argument('--customvideo_imgnum', type=int, default=1)
 
     parser.add_argument('--customvideo_config', type=str, default='')
+    
+    parser.add_argument('--static_video', type=str, default='', help="静态视频路径，可以是视频文件或图片序列文件夹")
+    parser.add_argument('--enable_static_video', action='store_true', help="启用静态视频播放")
 
     parser.add_argument('--tts', type=str, default='edgetts') #xtts gpt-sovits cosyvoice
     parser.add_argument('--REF_FILE', type=str, default=None)
@@ -463,6 +498,7 @@ if __name__ == '__main__':
     appasync.router.add_post("/set_audiotype", set_audiotype)
     appasync.router.add_post("/record", record)
     appasync.router.add_post("/is_speaking", is_speaking)
+    appasync.router.add_post("/set_static_video", set_static_video)
     appasync.router.add_static('/',path='web')
 
     # Configure default CORS settings.

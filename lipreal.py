@@ -196,7 +196,11 @@ class LipReal(BaseReal):
         #self.__loadavatar()
         self.model = model
         self.frame_list_cycle,self.face_list_cycle,self.coord_list_cycle = avatar
-
+        
+        self.static_video_enabled = False
+        self.static_video_frames = []
+        self.static_video_index = 0
+        
         self.asr = LipASR(opt,self)
         self.asr.warm_up()
         
@@ -204,7 +208,48 @@ class LipReal(BaseReal):
     
     def __del__(self):
         print(f'lipreal({self.sessionid}) delete')
-
+        
+    def load_static_video(self, video_path):
+        """加载静态视频，可以是视频文件或图片序列文件夹"""
+        self.static_video_frames = []
+        self.static_video_index = 0
+        self.static_video_enabled = False
+        
+        if os.path.isdir(video_path):
+            input_img_list = glob.glob(os.path.join(video_path, '*.[jpJP][pnPN]*[gG]'))
+            input_img_list = sorted(input_img_list, key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
+            
+            if len(input_img_list) > 0:
+                self.static_video_frames = read_imgs(input_img_list)
+                self.static_video_enabled = True
+                print(f"已加载静态视频图片序列: {len(self.static_video_frames)}帧")
+            else:
+                print("静态视频文件夹中没有找到图片")
+        elif os.path.isfile(video_path) and video_path.lower().endswith(('.mp4', '.avi', '.mov')):
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                print(f"无法打开视频文件: {video_path}")
+                return
+                
+            frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            print(f"提取视频文件中的帧: {frame_count}帧")
+            
+            for i in range(frame_count):
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                self.static_video_frames.append(frame)
+                
+            cap.release()
+            
+            if len(self.static_video_frames) > 0:
+                self.static_video_enabled = True
+                print(f"已加载静态视频: {len(self.static_video_frames)}帧")
+            else:
+                print("无法从视频文件提取帧")
+        else:
+            print(f"不支持的视频路径: {video_path}")
+            
    
     def process_frames(self,quit_event,loop=None,audio_track=None,video_track=None):
         
@@ -216,7 +261,12 @@ class LipReal(BaseReal):
             if audio_frames[0][1]!=0 and audio_frames[1][1]!=0: #全为静音数据，只需要取fullimg
                 self.speaking = False
                 audiotype = audio_frames[0][1]
-                if self.custom_index.get(audiotype) is not None: #有自定义视频
+                
+                if self.static_video_enabled and len(self.static_video_frames) > 0:
+                    static_idx = self.static_video_index % len(self.static_video_frames)
+                    combine_frame = self.static_video_frames[static_idx]
+                    self.static_video_index += 1
+                elif self.custom_index.get(audiotype) is not None: #有自定义视频
                     mirindex = self.mirror_index(len(self.custom_img_cycle[audiotype]),self.custom_index[audiotype])
                     combine_frame = self.custom_img_cycle[audiotype][mirindex]
                     self.custom_index[audiotype] += 1
