@@ -1,0 +1,8 @@
+[  
+  {  
+    "imgpath": "video/chuner-stop",  
+    "audiopath": "silence.wav",  
+    "audiotype": 1,  
+    "loop": true  
+  }  
+]

@@ -3,5 +3,5 @@ chcp 65001
 set PYTHONUSERBASE=.\python\Lib\site-packages
 set PYTHONPATH=.\python\Lib\site-packages
 set PATH=%PATH%;.\python\Scripts
-.\python\python.exe app.py --avatar_id avatar08
+.\python\python.exe app.py --avatar_id avatar08 --customvideo_config custom_video.json
 pause
