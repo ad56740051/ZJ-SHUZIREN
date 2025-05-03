@@ -4,5 +4,11 @@
     "audiopath": "silence.wav",  
     "audiotype": 1,  
     "loop": true  
-  }  
+  },
+  {  
+    "audiotype": 2,  
+    "imgpath": "video/chuner-guzheng",  
+    "audiopath": "video/chuner-guzheng.wav",  
+    "loop": false  
+  }
 ]

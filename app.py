@@ -114,6 +114,14 @@ avatar = None
 
 
 def llm_response(message,nerfreal):
+    # 检查是否是表演命令  
+    if "表演" in message and ("古筝" in message or "节目" in message):  
+        print("检测到表演命令，切换到表演视频")  
+        # 切换到表演模式 (audiotype=2)  
+        nerfreal.set_curr_state(2, True)  
+        # 返回表演开始的提示信息  
+        nerfreal.put_msg_txt("好的爸爸，我这就为您表演一段古筝曲。")  
+        return  
     # 记录开始时间
     start = time.perf_counter()
     from openai import OpenAI
