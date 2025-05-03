@@ -1,21 +1,22 @@
 // 定期检查数字人说话状态  
-function checkSpeakingStatus() {  
-    const sessionId = document.getElementById('sessionid').value;  
-    if (!sessionId) return;  
+function checkSpeakingStatus() {    
+  const sessionId = document.getElementById('sessionid').value;    
+  if (!sessionId) return;    
       
-    fetch('/is_speaking', {  
-      method: 'POST',  
-      headers: {'Content-Type': 'application/json'},  
-      body: JSON.stringify({sessionid: parseInt(sessionId)})  
-    })  
-    .then(response => response.json())  
-    .then(data => {  
-      if (!data.data && currentState !== 1) { // 不在说话且状态不是1  
-        switchToStaticVideo();  
-      }  
-    })  
-    .catch(err => console.error('检查说话状态失败:', err));  
-  }  
+  fetch('/is_speaking', {    
+    method: 'POST',    
+    headers: {'Content-Type': 'application/json'},    
+    body: JSON.stringify({sessionid: parseInt(sessionId)})    
+  })    
+  .then(response => response.json())    
+  .then(data => {    
+    // 添加对状态2的判断，如果当前状态是2（表演状态），则不切换到静态视频  
+    if (!data.data && currentState !== 1 && currentState !== 2) { // 不在说话且状态不是1和2    
+      switchToStaticVideo();    
+    }    
+  })    
+  .catch(err => console.error('检查说话状态失败:', err));    
+}
     
   // 切换到静态视频  
   function switchToStaticVideo() {  

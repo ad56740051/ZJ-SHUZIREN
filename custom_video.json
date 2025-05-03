@@ -7,8 +7,8 @@
   },
   {  
     "audiotype": 2,  
-    "imgpath": "video/chuner-guzheng",  
-    "audiopath": "video/chuner-guzheng.wav",  
+    "imgpath": "web/video/chuner-guzheng",  
+    "audiopath":"web/video/chuner-guzheng.wav",  
     "loop": false  
   }
 ]
