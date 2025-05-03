@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>静味阁春儿</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Basic Styles */
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: #f8f9fa;
+            font-family: sans-serif; /* Add a default font */
+        }
+        body {
+            padding: 20px;
+            display: flex; /* Use flex to center */
+            align-items: center;
+            justify-content: center;
+        }
+        .main-container {
+            max-width: 800px;
+            width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+            background: #fff; /* Add background to see container */
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .video-wrapper {
+            /* Keep basic video wrapper, but no complex positioning initially */
+            margin-bottom: 20px;
+        }
+        video {
+            width: 600px;
+            max-width: 100%;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto 15px auto; /* Add bottom margin */
+            background-color: #eee; /* Placeholder background */
+        }
+
+        /* --- CRITICAL: Ensure Controls are clickable --- */
+        .controls {
+            position: relative; /* Needed for z-index */
+            z-index: 10000 !important; /* Very high z-index */
+            padding: 15px;
+            background-color: rgba(255, 255, 0, 0.1); /* Light yellow bg to see area */
+            border: 1px dashed red; /* Red border to see area */
+            pointer-events: auto !important; /* Force pointer events */
+        }
+        .controls * { /* Apply to all children within controls */
+             pointer-events: auto !important; /* Force pointer events on children */
+             cursor: pointer; /* Ensure cursor changes */
+        }
+        .form-check-input,
+        .form-check-label,
+        button {
+            cursor: pointer;
+        }
+        /* --- END CRITICAL SECTION --- */
+
+        /* Hide stop button and action icons initially */
+        #stop, .action-icons {
+            display: none;
+        }
+
+        /* Basic action icons styling (initially hidden) */
+        .action-icons {
+            margin-top: 15px;
+            justify-content: center;
+            gap: 20px;
+            position: relative; /* Ensure icons are clickable */
+            z-index: 100; 
+            pointer-events: auto;
+        }
+        .action-icons button {
+            background: none; border: none; font-size: 1.8rem; color: #0d6efd; padding: 10px;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .action-icons button:hover {
+             color: #0a58ca;
+        }
+
+        /* Basic fullscreen button */
+        .fullscreen-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none; border-radius: 5px; padding: 5px 8px; font-size: 1rem;
+            cursor: pointer;
+            z-index: 100; /* Above video, below controls if needed */
+            pointer-events: auto !important; /* Ensure clickable */
+        }
+        .fullscreen-icon:hover {
+             background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* --- Restore Modal Styles --- */
+        .modal-content {
+             border-radius: 20px 20px 0 0;
+             border: none;
+             box-shadow: 0 -2px 20px rgba(0,0,0,0.15);
+             background-color: #fff;
+        }
+        .modal-header, .modal-footer {
+             border: none;
+             padding-bottom: 1rem; /* Add some padding back */
+             padding-top: 1rem;
+        }
+        #text-input-modal .form-control {
+             min-height: 100px;
+             border-radius: 12px;
+             font-size: 17px;
+             background: #f7f7fa;
+             border: 1px solid #e0e0e0;
+             padding: 14px;
+             box-shadow: none;
+        }
+        .modal-dialog {
+             position: fixed;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             margin: 0 auto;
+             width: 100vw;
+             max-width: 100vw;
+             border-radius: 0;
+             transform: translateY(100%);
+             transition: transform 0.35s cubic-bezier(0.36, 0.66, 0.04, 1);
+             z-index: 2001 !important; /* Above controls */
+             pointer-events: auto;
+        }
+        .modal.show .modal-dialog {
+             transform: translateY(0);
+             box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+        }
+        .modal {
+             z-index: 2000 !important; /* Above controls */
+             /* position: fixed;
+             bottom: 0;
+             left: 0;
+             right: 0;
+             top: unset;
+             margin: 0;
+             display: flex;
+             align-items: flex-end; */
+             pointer-events: none; /* Modal container non-blocking initially */
+        }
+         .modal.show {
+             pointer-events: auto; /* Blocking when shown */
+         }
+        .modal-backdrop {
+             z-index: 1500 !important; /* Below modal, above controls */
+             opacity: 0.45;
+             background-color: rgba(0,0,0,0.7);
+             backdrop-filter: blur(3px);
+             pointer-events: auto;
+        }
+        .modal-footer .btn {
+             border-radius: 22px;
+             padding: 10px 28px;
+             font-weight: 500;
+             font-size: 16px;
+             transition: all 0.2s ease;
+             pointer-events: auto; /* Ensure buttons inside are clickable */
+        }
+        .modal-footer .btn-primary {
+             background: linear-gradient(90deg, #4f8cff 0%, #2ec6ff 100%);
+             border: none;
+             color: #fff;
+             box-shadow: 0 2px 8px rgba(46,198,255,0.15);
+        }
+        .modal-footer .btn-secondary {
+             background-color: #f8f9fa;
+             color: #212529;
+             border: 1px solid #dee2e6;
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+             .modal-dialog { width: 100vw; max-width: 100vw; }
+        }
+        /* --- End Restore Modal Styles --- */
+
+        /* --- Restore Fullscreen Styles --- */
+        body.lights-off {
+            background-color: #000;
+        }
+        .video-wrapper.fullscreen-active {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000; /* Black background */
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            z-index: 1000 !important; /* High z-index, but below modals */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer; /* Allow clicking background to exit */
+            pointer-events: auto; /* Make wrapper clickable */
+        }
+        .video-wrapper.fullscreen-active video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto; /* Video width auto */
+            height: auto;
+            border-radius: 0;
+            cursor: default; /* Video itself shouldn't exit fullscreen */
+            pointer-events: auto; /* Video receives its own events */
+        }
+        /* Hide title and initial controls in fullscreen */
+        .video-wrapper.fullscreen-active ~ .main-container > h2, /* Hide title if outside wrapper */
+        .video-wrapper.fullscreen-active .controls {
+            display: none;
+        }
+        /* Style action icons in fullscreen */
+        .video-wrapper.fullscreen-active .action-icons {
+            display: flex !important; /* Ensure icons are shown */
+            position: fixed;
+            bottom: 30px; /* Position at bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050 !important; /* Above video/background, below exit button */
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            pointer-events: auto; /* Make icons clickable */
+            cursor: default; /* Container itself not clickable */
+        }
+         .video-wrapper.fullscreen-active .action-icons button {
+             pointer-events: auto; /* Ensure buttons inside are clickable */
+              cursor: pointer;
+         }
+        /* Style fullscreen exit button */
+        .video-wrapper.fullscreen-active .fullscreen-icon {
+             top: 20px;
+             right: 20px;
+             font-size: 1.5rem;
+             background: rgba(255, 255, 255, 0.2);
+             z-index: 1100 !important; /* Above action icons */
+             pointer-events: auto; /* Ensure clickable */
+             cursor: pointer;
+        }
+        /* --- End Restore Fullscreen Styles --- */
+
+        /* 底部滑出输入法弹窗样式 */
+        #text-input-modal .modal {
+            z-index: 3000 !important;
+        }
+        #text-input-modal .modal-dialog {
+            z-index: 3000 !important;
+        }
+        #text-input-modal .modal-dialog {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            margin: 0;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.15);
+            pointer-events: auto;
+            background: transparent;
+        }
+        #text-input-modal .modal-content {
+            border-radius: 12px 12px 0 0;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        #text-input-modal .modal-body {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px 8px 10px;
+            gap: 8px;
+        }
+        #text-input-modal .form-control {
+            min-height: 38px;
+            max-height: 80px;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #f7f7fa;
+            border: 1px solid #e0e0e0;
+            padding: 8px 10px;
+            box-shadow: none;
+            resize: none;
+        }
+        #text-input-modal .btn-primary {
+            border-radius: 8px;
+            padding: 6px 18px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h2 class="text-center mb-4">静味阁春儿</h2> <!-- Moved title outside wrapper for simplicity -->
+        <div class="video-wrapper" id="video-wrapper">
+            <video id="video" autoplay playsinline></video> <!-- Ensure autoplay and playsinline are present -->
+            <button id="fullscreen-btn" class="fullscreen-icon"><i class="fas fa-expand"></i></button>
+             <!-- Controls Div - explicitly styled to be on top -->
+            <div class="controls text-center">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="use-stun">
+                    <label class="form-check-label" for="use-stun">使用STUN</label>
+                </div>
+                <button id="start" class="btn btn-primary btn-sm">开始连接</button>
+                <button id="stop" class="btn btn-danger btn-sm">结束连接</button>
+                <input type="hidden" id="sessionid" value="0">
+            </div>
+        </div>
+        <!-- Action icons (initially hidden) -->
+        <div class="action-icons" id="action-icons">
+            <button id="keyboard-btn" title="文本输入" data-bs-toggle="modal" data-bs-target="#text-input-modal">
+                 <i class="fas fa-keyboard"></i>
+            </button>
+            <button id="voice-settings-btn" title="语音设置" data-bs-toggle="modal" data-bs-target="#voice-settings-modal">
+                 <i class="fas fa-microphone-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Restore Modals HTML -->
+    <div class="modal fade" id="text-input-modal" tabindex="-1" aria-labelledby="textInputModalLabel" aria-hidden="true" data-bs-backdrop="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body d-flex align-items-end p-2">
+                    <textarea class="form-control flex-grow-1 me-2" id="message-modal" rows="1" placeholder="请输入您想说的话...(Enter发送, Shift+Enter换行)" style="resize:none;"></textarea>
+                    <button type="button" class="btn btn-primary" id="send-text-btn">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="voice-settings-modal" tabindex="-1" aria-labelledby="voiceSettingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="voiceSettingsModalLabel">语音对话设置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>语音对话设置选项将显示在这里。</p>
+                    <iframe src="asr/index.html" style="width: 100%; height: 300px; border: none;"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="client.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // JS remains largely the same as last attempt, focusing on event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Elements --- 
+            let isFullScreen = false;
+            const videoWrapper = document.getElementById('video-wrapper');
+            const videoElement = document.getElementById('video');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const startButton = document.getElementById('start');
+            const stopButton = document.getElementById('stop');
+            const actionIcons = document.getElementById('action-icons');
+            const stunCheckbox = document.getElementById('use-stun');
+
+            // --- Event Listeners --- 
+            if (startButton) {
+                startButton.addEventListener('click', function(event) {
+                    console.log("Start button clicked via listener");
+                    event.stopPropagation(); 
+                    start(); // Call client.js function
+                    if(actionIcons) actionIcons.style.display = 'flex'; // Show icons
+                }, false);
+            }
+            if (stopButton) {
+                stopButton.addEventListener('click', function(event) {
+                    console.log("Stop button clicked via listener");
+                    event.stopPropagation();
+                    stop(); // Call client.js function
+                    if(actionIcons) actionIcons.style.display = 'none'; // Hide icons
+                    // We removed fullscreen CSS, so no need to call toggleFullScreen here for now
+                }, false);
+            }
+            if (stunCheckbox) {
+                stunCheckbox.addEventListener('change', function() {
+                    console.log('STUN checkbox changed:', this.checked);
+                }, false);
+            }
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', function(event) {
+                     console.log("Fullscreen button clicked");
+                     event.stopPropagation();
+                     toggleFullScreen();
+                 }, false);
+            }
+            
+             // Text Input/Voice Settings Icon Click Handlers 
+             // Remove simple alerts, Bootstrap handles toggling via attributes
+             const keyboardBtn = document.getElementById('keyboard-btn');
+             const voiceSettingsBtn = document.getElementById('voice-settings-btn');
+             // Basic logging can remain if needed for debugging
+             if (keyboardBtn) {
+                 keyboardBtn.addEventListener('click', function() { 
+                     console.log('Keyboard icon clicked - modal should toggle'); 
+                 });
+             }
+              if (voiceSettingsBtn) {
+                 voiceSettingsBtn.addEventListener('click', function() { 
+                     console.log('Voice settings icon clicked - modal should toggle'); 
+                 });
+             }
+
+            // --- Restore Text Input Modal Functions --- 
+            function sendMessage() {
+                var message = $('#message-modal').val();
+                if (!message.trim()) return;
+                console.log('Sending:', message);
+                const sessionId = parseInt($('#sessionid').val()) || 0;
+                fetch('/human', {
+                    body: JSON.stringify({
+                        text: message,
+                        type: 'chat',
+                        interrupt: true,
+                        sessionid: sessionId
+                    }),
+                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                 })
+                .then(data => {
+                    console.log('Send success:', data);
+                    $('#message-modal').val('');
+                    var textInputModalEl = document.getElementById('text-input-modal');
+                    // Use Bootstrap's static method to get instance if available
+                    var textInputModal = bootstrap.Modal.getInstance(textInputModalEl);
+                    if (textInputModal) {
+                        textInputModal.hide();
+                    } else {
+                        // Fallback if instance not found (might happen if modal wasn't fully initialized)
+                        $(textInputModalEl).modal('hide'); 
+                    }
+                })
+                .catch(error => {
+                    console.error('Send error:', error);
+                    alert('发送消息失败，请检查连接或稍后再试。\n' + error.message);
+                });
+            }
+
+            // Ensure jQuery is loaded before using $
+            $(document).ready(function() {
+                $('#send-text-btn').on('click', sendMessage);
+                $('#message-modal')
+                  .on('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      if (e.isComposing || $(this).data('composing')) return;
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  })
+                  .on('compositionstart', function() {
+                    $(this).data('composing', true);
+                  })
+                  .on('compositionend', function() {
+                    $(this).data('composing', false);
+                  });
+            });
+            
+            // Keep minimal fullscreen JS disabled for now
+            // --- Restore Fullscreen Functions --- 
+            function toggleFullScreen() {
+                console.log("toggleFullScreen called");
+                if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    // Enter fullscreen
+                     console.log("Entering fullscreen");
+                    if (videoWrapper.requestFullscreen) {
+                        videoWrapper.requestFullscreen();
+                    } else if (videoWrapper.webkitRequestFullscreen) { /* Safari */
+                        videoWrapper.webkitRequestFullscreen();
+                    } else if (videoWrapper.msRequestFullscreen) { /* IE11 */
+                        videoWrapper.msRequestFullscreen();
+                    }
+                } else {
+                    // Exit fullscreen
+                     console.log("Exiting fullscreen programmatically");
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+
+            function handleFullscreenChange() {
+                isFullScreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+                 console.log("handleFullscreenChange - isFullScreen:", isFullScreen);
+                if (isFullScreen) {
+                    videoWrapper.classList.add('fullscreen-active');
+                    document.body.classList.add('lights-off');
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                    // Add listener to exit on background click ONLY when entering fullscreen
+                    videoWrapper.addEventListener('click', exitFullscreenOnClickOutside);
+                } else {
+                    videoWrapper.classList.remove('fullscreen-active');
+                    document.body.classList.remove('lights-off');
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                    // Remove listener when exiting fullscreen
+                    videoWrapper.removeEventListener('click', exitFullscreenOnClickOutside);
+                }
+            }
+            
+             function exitFullscreenOnClickOutside(event) {
+                 // Check if the click was directly on the wrapper (the background)
+                 // and NOT on the icons container or any button/icon inside it.
+                 if (event.target === videoWrapper) { 
+                     console.log("Background clicked, exiting fullscreen");
+                     // Don't call toggleFullScreen() as it might try to re-enter
+                     if (document.exitFullscreen) {
+                         document.exitFullscreen();
+                     } else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+                       else if (document.msExitFullscreen) { document.msExitFullscreen(); }
+                 }
+             }
+
+            // Restore fullscreen event listeners
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        });
+    </script>
+    <script src="status_check.js"></script>
+</body>
+</html>

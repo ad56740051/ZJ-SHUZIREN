@@ -330,6 +330,13 @@ async def is_speaking(request):
     params = await request.json()
 
     sessionid = params.get('sessionid',0)
+    if sessionid not in nerfreals:
+        return web.Response(
+            content_type="application/json",
+            text=json.dumps(
+                {"code": -1, "data": False, "msg": "Session not found"}
+            ),
+        )
     return web.Response(
         content_type="application/json",
         text=json.dumps(

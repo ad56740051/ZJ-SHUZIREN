@@ -304,6 +304,18 @@
             padding: 6px 18px;
             font-size: 15px;
         }
+        #performance-btn {  
+            background: none;   
+            border: none;   
+            font-size: 1.8rem;   
+            color: #0d6efd;   
+            padding: 10px;  
+            pointer-events: auto;  
+            cursor: pointer;  
+        }  
+        #performance-btn:hover {  
+            color: #0a58ca;  
+        }
     </style>
 </head>
 <body>
@@ -324,13 +336,17 @@
             </div>
         </div>
         <!-- Action icons (initially hidden) -->
-        <div class="action-icons" id="action-icons">
-            <button id="keyboard-btn" title="文本输入" data-bs-toggle="modal" data-bs-target="#text-input-modal">
-                 <i class="fas fa-keyboard"></i>
-            </button>
-            <button id="voice-settings-btn" title="语音设置" data-bs-toggle="modal" data-bs-target="#voice-settings-modal">
-                 <i class="fas fa-microphone-alt"></i>
-            </button>
+        <div class="action-icons" id="action-icons">  
+            <button id="keyboard-btn" title="文本输入" data-bs-toggle="modal" data-bs-target="#text-input-modal">  
+                <i class="fas fa-keyboard"></i>  
+            </button>  
+            <button id="voice-settings-btn" title="语音设置" data-bs-toggle="modal" data-bs-target="#voice-settings-modal">  
+                <i class="fas fa-microphone-alt"></i>  
+            </button>  
+            <!-- Add performance button here -->  
+            <button id="performance-btn" title="古筝表演">  
+                <i class="fas fa-music"></i>  
+            </button>  
         </div>
     </div>
 
@@ -552,6 +568,39 @@
             document.addEventListener('mozfullscreenchange', handleFullscreenChange);
             document.addEventListener('MSFullscreenChange', handleFullscreenChange);
         });
+        
+    </script>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {  
+    // 表演事件监听 
+      
+    // Performance Button Click Handler  
+    const performanceBtn = document.getElementById('performance-btn');  
+    if (performanceBtn) {  
+        performanceBtn.addEventListener('click', function() {  
+            console.log('Performance button clicked - switching to performance state');  
+            const sessionId = parseInt($('#sessionid').val()) || 0;  
+              
+            // Call set_audiotype endpoint to switch to performance state (2)  
+            fetch('/set_audiotype', {  
+                method: 'POST',  
+                headers: {'Content-Type': 'application/json'},  
+                body: JSON.stringify({  
+                    sessionid: sessionId,  
+                    audiotype: 2,  // Set to state 2 for performance  
+                    reinit: true  
+                })  
+            })  
+            .then(() => {  
+                console.log('Switched to performance state');  
+            })  
+            .catch(err => console.error('Failed to switch to performance state:', err));  
+        });  
+    }  
+});
+
+
     </script>
     <script src="status_check.js"></script>
 </body>

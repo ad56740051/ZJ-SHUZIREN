@@ -79,8 +79,12 @@ class BaseReal:
         self.custom_opt = {}
         self.__loadcustom()
 
-    def put_msg_txt(self,msg,eventpoint=None):
-        self.tts.put_msg_txt(msg,eventpoint)
+    def put_msg_txt(self, msg, eventpoint=None):  
+        self.tts.put_msg_txt(msg, eventpoint)     
+    # 如果这是表演确认消息，设置一个回调在消息播放完成后执行  
+        if eventpoint and eventpoint.get('type') == 'performance_confirmation':  
+        # 设置在消息结束后自动转换到表演状态  
+            self.tts.add_completion_callback(lambda: self.set_curr_state(2, True))
     
     def put_audio_frame(self,audio_chunk,eventpoint=None): #16khz 20ms pcm
         self.asr.put_audio_frame(audio_chunk,eventpoint)
@@ -123,6 +127,8 @@ class BaseReal:
             print(item)
             input_img_list = glob.glob(os.path.join(item['imgpath'], '*.[jpJP][pnPN]*[gG]'))
             input_img_list = sorted(input_img_list, key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
+            if len(input_img_list) == 0:
+                print(f"[WARN] No images found in {item['imgpath']} for audiotype {item['audiotype']}")
             self.custom_img_cycle[item['audiotype']] = read_imgs(input_img_list)
             self.custom_audio_cycle[item['audiotype']], sample_rate = sf.read(item['audiopath'], dtype='float32')
             self.custom_audio_index[item['audiotype']] = 0
@@ -242,14 +248,26 @@ class BaseReal:
         os.system(cmd_combine_audio) 
         #os.remove(output_path)
 
-    def mirror_index(self,size, index):
-        #size = len(self.coord_list_cycle)
+    # def mirror_index(self,size, index):
+    #     #size = len(self.coord_list_cycle)
+    #     turn = index // size
+    #     res = index % size
+    #     if turn % 2 == 0:
+    #         return res
+    #     else:
+    #         return size - res - 1 
+        
+    def mirror_index(self, size, index):
+        if size == 0:
+           print("[ERROR] mirror_index: size is 0! Check custom_img_cycle resource.")
+           return 0  # 或 raise Exception("No images loaded for this audiotype")
         turn = index // size
         res = index % size
         if turn % 2 == 0:
-            return res
+           return res
         else:
-            return size - res - 1 
+           return size - res - 1
+    
     
     def get_audio_stream(self,audiotype):
         idx = self.custom_audio_index[audiotype]
