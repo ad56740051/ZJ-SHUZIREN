@@ -351,7 +351,7 @@
     </div>
 
     <!-- Restore Modals HTML -->
-    <div class="modal fade" id="text-input-modal" tabindex="-1" aria-labelledby="textInputModalLabel" aria-hidden="true" data-bs-backdrop="false">
+    <div class="modal fade" id="text-input-modal" tabindex="-1" aria-labelledby="textInputModalLabel" aria-hidden="true" data-bs-backdrop="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body d-flex align-items-end p-2">
@@ -481,7 +481,7 @@
                 })
                 .catch(error => {
                     console.error('Send error:', error);
-                    alert('发送消息失败，请检查连接或稍后再试。\n' + error.message);
+                    //alert('发送消息失败，请检查连接或稍后再试。\n' + error.message);
                 });
             }
 
@@ -590,15 +590,26 @@
                     sessionid: sessionId,  
                     audiotype: 2,  // Set to state 2 for performance  
                     reinit: true  
+                    })  
                 })  
-            })  
             .then(() => {  
                 console.log('Switched to performance state');  
             })  
             .catch(err => console.error('Failed to switch to performance state:', err));  
+            });  
+        }  
+    });
+    // 表演视频禁止循环  
+    document.addEventListener('DOMContentLoaded', function() {  
+    const videoElement = document.getElementById('video');  
+    videoElement.addEventListener('ended', function() {  
+        // Check if current state is performance (2)  
+        if (currentState === 2) {  
+            // Switch back to static state after performance ends  
+            switchToStaticVideo();  
+            }  
         });  
-    }  
-});
+    });
 
 
     </script>
