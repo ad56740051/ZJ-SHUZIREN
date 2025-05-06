@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>春儿大模型-测试</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="main-card">
+      <div class="card-gradient-border"></div>
+      
+      <div class="card-header">
+        <div class="header-title">
+          <div class="logo pulse">C</div>
+          <h1 class="title">春儿大模型</h1>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <div class="settings-grid">
+          <!-- Options -->
+          <div class="checkbox-container">
+            <label class="checkbox-wrapper">
+              <input type="checkbox" class="checkbox-input" id="enableGoogleSearch" checked>
+              <span class="checkbox-display"></span>
+              <span class="checkbox-label">工具</span>
+            </label>
+            
+            <label class="checkbox-wrapper">
+              <input type="checkbox" class="checkbox-input" id="allowInterruptions">
+              <span class="checkbox-display"></span>
+              <span class="checkbox-label">打断</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="btn-row">
+          <button id="startAudioBtn" class="btn btn-primary">
+            文本聊天
+          </button>
+          <button id="startCameraBtn" class="btn btn-primary">
+            视频聊天
+          </button>
+          <button id="startScreenBtn" class="btn btn-primary">
+            共享电脑
+          </button>
+          <button id="stopButton" class="btn btn-danger" disabled>
+            停止聊天
+          </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="messages-container">
+          <div class="messages-heading">Conversation</div>
+          <div id="messages" class="messages"></div>
+        </div>
+
+        <!-- Video Preview / Canvas (for camera/screen) -->
+        <div id="videoContainer" class="video-container hidden">
+          <div class="form-label">摄像头</div>
+          <div class="video-wrapper">
+            <div class="video-overlay">直播中</div>
+            <video
+              id="videoElem"
+              autoplay
+              playsinline
+              muted
+              width="640"
+              height="480"
+            ></video>
+            <canvas
+              id="canvasElem"
+              class="hidden"
+              width="640"
+              height="480"
+            ></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load modules using ES6 module syntax -->
+  <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
