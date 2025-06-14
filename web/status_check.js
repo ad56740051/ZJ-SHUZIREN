@@ -1,4 +1,3 @@
-
 // 切换到表演视频（状态2）  
 function switchToPerformanceVideo() {  
   const sessionId = document.getElementById('sessionid').value;  
@@ -90,8 +89,3 @@ function checkSpeakingStatus() {
     
   // 启动状态检查  
   setInterval(checkSpeakingStatus, 1000);
-
-  // 添加表演按钮的事件监听  
-document.getElementById('performance-btn').addEventListener('click', function() {  
-  switchToPerformanceVideo();  
-});

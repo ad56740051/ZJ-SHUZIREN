@@ -116,19 +116,20 @@ avatar = None
 def llm_response(message,nerfreal):
     # 检查是否是表演命令  
     if "表演" in message and ("笛子" in message or "节目" in message):  
-        print("检测到表演命令，切换到表演视频")  
-        # 切换到表演模式 (audiotype=2)  
-        nerfreal.set_curr_state(2, True)  
-        # 返回表演开始的提示信息  
-        nerfreal.put_msg_txt("好的爸爸，我这就为您演奏一段古筝曲。")  
-        return  
+        print("检测到表演命令，先朗读再切换到表演视频")  
+        # 先朗读，朗读完毕后再切换到表演状态
+        nerfreal.put_msg_txt(
+            "好的爸爸，我这就为您表演节目。",
+            eventpoint={'type': 'performance_confirmation'}
+        )
+        return
     # 记录开始时间
     start = time.perf_counter()
     from openai import OpenAI
     client = OpenAI(
         # 如果您没有配置环境变量，请在此处用您的API Key进行替换
         api_key=os.getenv("DASHSCOPE_API_KEY"),
-        # api_key="sk-ZZZZZZZZZZZZZZZZZZZZZ",
+        # api_key="sk-83e83e9aebfa4a3eb6015aba70089c74",
         # 填写DashScope SDK的base_url
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )

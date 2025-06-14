@@ -579,17 +579,18 @@
     const performanceBtn = document.getElementById('performance-btn');  
     if (performanceBtn) {  
         performanceBtn.addEventListener('click', function() {  
-            console.log('Performance button clicked - switching to performance state');  
+            console.log('Performance button clicked - sending performance message');  
             const sessionId = parseInt($('#sessionid').val()) || 0;  
               
             // Call set_audiotype endpoint to switch to performance state (2)  
-            fetch('/set_audiotype', {  
+            fetch('/human', {  
                 method: 'POST',  
                 headers: {'Content-Type': 'application/json'},  
                 body: JSON.stringify({  
-                    sessionid: sessionId,  
-                    audiotype: 2,  // Set to state 2 for performance  
-                    reinit: true  
+                    text: "好的爸爸，我这就为您表演节目。",  
+                    type: 'chat',  
+                    interrupt: true,  
+                    sessionid: sessionId  
                     })  
                 })  
             .then(() => {  

@@ -60,6 +60,18 @@ class BaseTTS:
 
         self.msgqueue = Queue()
         self.state = State.RUNNING
+        self._completion_callbacks = []  # 新增: 回调队列
+
+    def add_completion_callback(self, callback):
+        self._completion_callbacks.append(callback)
+
+    def _run_completion_callbacks(self):
+        for cb in self._completion_callbacks:
+            try:
+                cb()
+            except Exception as e:
+                logger.error(f"TTS completion callback error: {e}")
+        self._completion_callbacks.clear()
 
     def flush_talk(self):
         self.msgqueue.queue.clear()
@@ -81,6 +93,7 @@ class BaseTTS:
             except queue.Empty:
                 continue
             self.txt_to_audio(msg)
+            self._run_completion_callbacks()  # 新增: 每次朗读完毕后调用回调
         logger.info('ttsreal thread stop')
     
     def txt_to_audio(self,msg):
