@@ -45,7 +45,7 @@ class LLM:
 if __name__ == '__main__':
     llm = LLM()
     # llm.test_Gemini(api_key='你的API Key', proxy_url=None)
-    # llm = LLM().init_model('Gemini', model_path= 'gemini-pro',api_key='AIzaSyBWAWfT8zsyAZcRIXLS5Vzlw8KKCN9qsAg', proxy_url='http://172.31.71.58:7890')
+    # llm = LLM().init_model('Gemini', model_path= 'gemini-pro',api_key='ZZZZZZZZZZZZZZ', proxy_url='http://172.31.71.58:7890')
     # response = llm.chat("如何应对压力？")
     # llm = LLM().init_model('VllmGPT', model_path= 'THUDM/chatglm3-6b')
     # response = llm.chat("如何应对压力？")

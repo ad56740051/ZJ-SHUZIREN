@@ -38,12 +38,27 @@ from fractions import Fraction
 from ttsreal import EdgeTTS,VoitsTTS,XTTS,CosyVoiceTTS,FishTTS
 
 from tqdm import tqdm
+
+def try_int(s):
+    try:
+        return int(os.path.splitext(os.path.basename(s))[0])
+    except:
+        return s
+
 def read_imgs(img_list):
     frames = []
     print('reading images...')
-    for img_path in tqdm(img_list):
+    target_size = None
+    for img_path in sorted(img_list, key=try_int):
         frame = cv2.imread(img_path)
-        frames.append(frame)
+        if frame is None:
+            print(f"[ERROR] Failed to read image: {img_path}")
+        else:
+            if target_size is None:
+                target_size = (frame.shape[1], frame.shape[0])
+            if (frame.shape[1], frame.shape[0]) != target_size:
+                frame = cv2.resize(frame, target_size)
+            frames.append(frame)
     return frames
 
 class BaseReal:
@@ -126,7 +141,7 @@ class BaseReal:
         for item in self.opt.customopt:
             print(item)
             input_img_list = glob.glob(os.path.join(item['imgpath'], '*.[jpJP][pnPN]*[gG]'))
-            input_img_list = sorted(input_img_list, key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
+            input_img_list = sorted(input_img_list)
             if len(input_img_list) == 0:
                 print(f"[WARN] No images found in {item['imgpath']} for audiotype {item['audiotype']}")
             self.custom_img_cycle[item['audiotype']] = read_imgs(input_img_list)
@@ -291,3 +306,7 @@ class BaseReal:
     #             self.custom_index=0
     #     else:
     #         self.custom_index+=1
+
+    def print_frames(self):
+        for i, f in enumerate(self.frames):
+            print(f"Frame {i} shape: {None if f is None else f.shape}")

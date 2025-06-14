@@ -115,12 +115,12 @@ avatar = None
 
 def llm_response(message,nerfreal):
     # 检查是否是表演命令  
-    if "表演" in message and ("古筝" in message or "节目" in message):  
+    if "表演" in message and ("笛子" in message or "节目" in message):  
         print("检测到表演命令，切换到表演视频")  
         # 切换到表演模式 (audiotype=2)  
         nerfreal.set_curr_state(2, True)  
         # 返回表演开始的提示信息  
-        nerfreal.put_msg_txt("好的爸爸，我这就为您表演一段古筝曲。")  
+        nerfreal.put_msg_txt("好的爸爸，我这就为您演奏一段古筝曲。")  
         return  
     # 记录开始时间
     start = time.perf_counter()
@@ -128,7 +128,7 @@ def llm_response(message,nerfreal):
     client = OpenAI(
         # 如果您没有配置环境变量，请在此处用您的API Key进行替换
         api_key=os.getenv("DASHSCOPE_API_KEY"),
-        # api_key="sk-83e83e9aebfa4a3eb6015aba70089c74",
+        # api_key="sk-ZZZZZZZZZZZZZZZZZZZZZ",
         # 填写DashScope SDK的base_url
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
@@ -137,7 +137,7 @@ def llm_response(message,nerfreal):
 
     # 创建聊天完成请求
     completion = client.chat.completions.create(
-        model="qwen3-235b-a22b",
+        model="qwen-plus",
         messages=[{'role': 'system', 'content': '你的名字叫春儿,英文名Chuner,你的爸爸叫张静,今年2025年。你18岁，你来自南宋奉贤，你是从2024年穿越到奉贤张静家。你擅长弹古筝和琵琶，擅长舞剑。喜欢古典文学。每次回答问题你都要喊一声爸爸。'},
                   {'role': 'user', 'content': message}],
         extra_body={"enable_search": True,"enable_thinking": False},        
@@ -456,7 +456,7 @@ if __name__ == '__main__':
     print(opt)
     model = load_model("./models/wav2lip.pth")
     avatar = load_avatar(opt.avatar_id)
-    warm_up(opt.batch_size,model,384)
+    warm_up(opt.batch_size,model,256)
     # for k in range(opt.max_session):
     #     opt.sessionid=k
     #     nerfreal = LipReal(opt,model)

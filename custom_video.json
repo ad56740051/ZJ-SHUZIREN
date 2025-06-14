@@ -1,6 +1,6 @@
 [  
   {  
-    "imgpath": "video/chuner-stop",  
+    "imgpath": "video/chuner-stop-2",  
     "audiopath": "silence.wav",  
     "audiotype": 1,  
     "loop": true  
@@ -8,7 +8,7 @@
   {  
     "audiotype": 2,  
     "imgpath": "web/video/yanzou",  
-    "audiopath":"web/video/yanzou.wav",  
+    "audiopath":"web/video/dizi.wav",  
     "loop": false  
   }
 ]
